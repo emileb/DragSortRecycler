@@ -22,6 +22,8 @@ The library consists of a single Java file which you connect to your RecyclerVie
 * RecycleView ItemAnimator must be set to null
 
 ## Integration
+Example here: https://github.com/emileb/DragSortRecycler/blob/master/testdragsortrecycler/src/main/java/com/emtronics/testdragsortrecycler/MainActivity.java
+
 
 In your adapter:
 ```java
@@ -53,5 +55,48 @@ Connecting to your RecyclerView
         recyclerView.addOnItemTouchListener(dragSortRecycler);
         recyclerView.setOnScrollListener(dragSortRecycler.getScrollListener());
 ```
+
+## Methods
+
+```java
+setViewHandleId(int)
+```
+(Optional, use this or setLeftDragArea) Set the resource ID of the view you wish to use as the handle (the thing in the list item you drag)
+<hr>
+
+```java
+setLeftDragArea(int)
+```
+(Optional, use this or setViewHandleId) Set the number of pixels from the left hand side of the list to use as the drag area. You will need to calculate this releative to the devices screen density.
+<hr>
+
+```java
+setFloatingAlpha(int)
+```
+Set how transparent the 'float' view should be when you drag. Range is 0 (invisible) to 1 (opqaue)
+<hr>
+
+```java
+setFloatingBgColor(int)
+```
+(Optional) Set the background color and alpha of the floating item, format is normal ARGB
+<hr>
+
+```java
+setAutoScrollSpeed(int)
+```
+How fast it auto scrolls when you get to the top or bottom of the screen. Should acheive similar results across devices.
+<hr>
+
+```java
+setAutoScrollWindow(int)
+```
+Sets where it starts to autoscroll, this is a faction of the total height of the RecycleView. So a value of 0.1 will mean the it will start scrolling at the bottom 10% and top 90% of the view.
+<hr>
+
+
+
+
+
 
 Please note this is a first release, if I have done something wrong please let me know! Thank you.

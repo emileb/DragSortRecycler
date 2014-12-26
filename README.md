@@ -91,7 +91,7 @@ How fast it auto scrolls when you get to the top or bottom of the screen. Should
 ```java
 setAutoScrollWindow(float)
 ```
-Sets where it starts to autoscroll, this is a faction of the total height of the RecycleView. So a value of 0.1 will mean the it will start scrolling at the bottom 10% and top 90% of the view.
+Sets where it starts to autoscroll, this is a fraction of the total height of the RecyclerView. So a value of 0.1 will mean that it will start scrolling at the bottom 10% and top 90% of the view.
 <hr>
 
 

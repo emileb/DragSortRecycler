@@ -1,7 +1,7 @@
 DragSortRecycler
 ================
 
-DragDropRecycler allows you to easily add drag-and-drop functionaly to your existing RecyclerView.
+DragSortRecycler allows you to easily add drag-and-drop functionaly to your existing RecyclerView.
 
 The library consists of a single Java file which you connect to your RecyclerView - NO need to change or extend the RecyclerView itself, and NO need to extend your Adapter.
 

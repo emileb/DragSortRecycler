@@ -357,8 +357,6 @@ public class DragSortRecycler extends RecyclerView.ItemDecoration implements Rec
         rv.scrollBy(0, (int)scrollAmmount);
 
         rv.invalidateItemDecorations();// Redraw
-
-        getNewPostion(rv);
     }
 
     Paint bgColor = new Paint();

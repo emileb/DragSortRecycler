@@ -104,6 +104,7 @@ public class MainActivity extends ActionBarActivity {
         {
             this.items = items;
             this.context = context;
+
         }
 
         @Override

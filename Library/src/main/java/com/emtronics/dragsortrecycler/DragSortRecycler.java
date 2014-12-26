@@ -1,3 +1,24 @@
+/*
+ * DragSortRecycler
+ *
+ * Added drag and drop functionality to your RecyclerView
+ *
+ *
+ * Copyright 2014 Emile Belanger.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *         http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.emtronics.dragsortrecycler;
 
 import android.graphics.Bitmap;
@@ -10,15 +31,12 @@ import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 
-/**
- * Created by Emile Belanger on 24/12/2014.
- */
 
 public class DragSortRecycler extends RecyclerView.ItemDecoration implements RecyclerView.OnItemTouchListener {
 
     final String TAG = "RecyclerDragSort";
 
-    final boolean DEBUG = true;
+    final boolean DEBUG = false;
 
     private int dragHandleWidth = 0;
 
@@ -49,7 +67,7 @@ public class DragSortRecycler extends RecyclerView.ItemDecoration implements Rec
 
     public interface ItemMovedInterface
     {
-        public void moveElements(int from, int to);
+        public void moveElement(int from, int to);
     }
 
     private void debugLog(String log)
@@ -74,6 +92,11 @@ public class DragSortRecycler extends RecyclerView.ItemDecoration implements Rec
     public void setViewHandleId(int id)
     {
         viewHandleId = id;
+    }
+
+    public void setLeftDragArea(int w)
+    {
+        dragHandleWidth = w;
     }
 
     public void setFloatingAlpha(float a)
@@ -119,44 +142,12 @@ public class DragSortRecycler extends RecyclerView.ItemDecoration implements Rec
 
             if (itemId == selectedDragItem)
             {
-                //This does not work because the view gets recycled when off screen
-                //outRect.top = (int)totalMovment;
-                //outRect.bottom = -(int)totalMovment;
-
-                //So instead we create a bitmap and draw that as a fake item
                 view.setVisibility(View.INVISIBLE);
             }
             else
             {
                 //Make view visible uncase invisible
                 view.setVisibility(View.VISIBLE);
-                /*
-                int itemsDown = (int)(totalMovment / view.getHeight());
-
-                //Move whole items UP one space(Moving an item to the bottom of the list)
-                if ((itemId > selectedDragItem) && (itemId-selectedDragItem) <= itemsDown)
-                {
-                    outRect.top = -(int)view.getHeight();
-                    outRect.bottom = (int)view.getHeight();
-                }//Move item a fraction up
-                else if ((itemId == (selectedDragItem + itemsDown + 1)) && (totalMovment > 0))
-                {
-                    float fractionMovment = totalMovment%view.getHeight();
-                    outRect.top = -(int)fractionMovment;
-                    outRect.bottom = (int)fractionMovment;
-                }//Move whole items DOWN one space (moving an item to the top of the list)
-                else if ((itemId < selectedDragItem) && (selectedDragItem-itemId) <= -itemsDown)
-                {
-                    outRect.top = (int)view.getHeight();
-                    outRect.bottom = -(int)view.getHeight();
-                }
-                else if ((itemId == (selectedDragItem + itemsDown - 1)) && (totalMovment < 0))
-                {
-                    float fractionMovment = -totalMovment%view.getHeight();
-                    outRect.top = (int)fractionMovment;
-                    outRect.bottom = -(int)fractionMovment;
-                }
-                 */
 
                 //Find middle of the floatingItem
                 float floatMiddleY = floatingItemBounds.top + floatingItemBounds.height()/2;
@@ -259,7 +250,7 @@ public class DragSortRecycler extends RecyclerView.ItemDecoration implements Rec
 
             boolean dragging = false;
 
-            if (e.getX() < dragHandleWidth)
+            if ((dragHandleWidth > 0 ) && (e.getX() < dragHandleWidth))
             {
                 dragging = true;
             }
@@ -328,7 +319,7 @@ public class DragSortRecycler extends RecyclerView.ItemDecoration implements Rec
             {
                 long newPos = getNewPostion(rv);
                 if (moveInterface != null)
-                    moveInterface.moveElements((int)selectedDragItem, (int)newPos);
+                    moveInterface.moveElement((int) selectedDragItem, (int) newPos);
             }
 
             selectedDragItem = -1;

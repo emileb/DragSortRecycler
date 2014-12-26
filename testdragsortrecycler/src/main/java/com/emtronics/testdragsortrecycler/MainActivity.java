@@ -62,14 +62,13 @@ public class MainActivity extends ActionBarActivity {
 
         dragSortRecycler.setItemMoveInterface(new DragSortRecycler.ItemMovedInterface() {
             @Override
-            public void moveElements(int from, int to) {
+            public void moveElement(int from, int to) {
                 Log.d(TAG, "moveElements " + from + " to " + to);
                 Integer item = items.remove(from);
                 items.add(to,item);
                 adapter.notifyDataSetChanged();
             }
         });
-
 
         recyclerView.addItemDecoration(dragSortRecycler);
         recyclerView.addOnItemTouchListener(dragSortRecycler);

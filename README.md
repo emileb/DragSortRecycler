@@ -5,6 +5,8 @@ DragDropRecycler allows you to easily add drag-and-drop functionaly to your exis
 
 The library consists of a single Java file which you connect to your RecyclerView - NO need to change or extend the RecyclerView itself, and NO need to extend your Adapter.
 
+![demo](Screenshots/demo.gif)
+
 ## Features
 * Quick and easy to integrate
 * Very smooth switching of items
@@ -52,4 +54,4 @@ Connecting to your RecyclerView
         recyclerView.setOnScrollListener(dragSortRecycler.getScrollListener());
 ```
 
-
+Please note this is a first release, if I have done something wrong please let me know! Thank you.

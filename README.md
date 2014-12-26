@@ -15,7 +15,7 @@ The library consists of a single Java file which you connect to your RecyclerVie
 * Works with varying size of views
 
 ## Limitations
-* Currently only work with vertial lists
+* Currently only work with vertical lists, horizontal lists later
 * setHasStableIds must be set to true
 * RecycleView ItemAnimator must be set to null
 

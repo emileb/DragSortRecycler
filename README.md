@@ -71,7 +71,7 @@ setLeftDragArea(int)
 <hr>
 
 ```java
-setFloatingAlpha(int)
+setFloatingAlpha(float)
 ```
 Set how transparent the 'float' view should be when you drag. Range is 0 (invisible) to 1 (opqaue)
 <hr>
@@ -83,13 +83,13 @@ setFloatingBgColor(int)
 <hr>
 
 ```java
-setAutoScrollSpeed(int)
+setAutoScrollSpeed(float)
 ```
 How fast it auto scrolls when you get to the top or bottom of the screen. Should acheive similar results across devices.
 <hr>
 
 ```java
-setAutoScrollWindow(int)
+setAutoScrollWindow(float)
 ```
 Sets where it starts to autoscroll, this is a faction of the total height of the RecycleView. So a value of 0.1 will mean the it will start scrolling at the bottom 10% and top 90% of the view.
 <hr>

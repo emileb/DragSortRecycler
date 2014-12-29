@@ -41,7 +41,7 @@ public class MainActivity extends ActionBarActivity {
         }
 
         final CustomAdapter adapter = new CustomAdapter(items,this);
-        adapter.setHasStableIds(true);
+      //  adapter.setHasStableIds(true);
 
         recyclerView.setAdapter(adapter);
         recyclerView.setLayoutManager( new LinearLayoutManager(this));
@@ -61,6 +61,8 @@ public class MainActivity extends ActionBarActivity {
                 Integer item = items.remove(from);
                 items.add(to, item);
                 adapter.notifyDataSetChanged();
+                //notifyItemMoved does work, but it makes the list scroll pos jump a little when dragging near the top or bottom
+                //adapter.notifyItemMoved(from,to);
             }
         });
 
@@ -148,10 +150,6 @@ public class MainActivity extends ActionBarActivity {
             return items.size();
         }
 
-        @Override
-        public long getItemId(int position) {
-            return position;
-        }
 
     }
 }

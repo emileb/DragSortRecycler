@@ -18,7 +18,7 @@ The library consists of a single Java file which you connect to your RecyclerVie
 
 ## Limitations
 * Currently only works with vertical lists, horizontal lists later
-* RecycleView ItemAnimator must be set to null
+* RecycleView ItemAnimator must be set to null (possibly a custom animation will work)
 
 ## Integration
 Example here: https://github.com/emileb/DragSortRecycler/blob/master/testdragsortrecycler/src/main/java/com/emtronics/testdragsortrecycler/MainActivity.java

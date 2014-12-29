@@ -30,6 +30,7 @@ import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
+import android.support.annotation.Nullable;
 
 
 public class DragSortRecycler extends RecyclerView.ItemDecoration implements RecyclerView.OnItemTouchListener {
@@ -63,11 +64,20 @@ public class DragSortRecycler extends RecyclerView.ItemDecoration implements Rec
 
 
     ItemMovedInterface moveInterface;
+    private boolean isDragging;
+    @Nullable
+    OnDragStateChangedListener dragStateChangedListener;
+
 
 
     public interface ItemMovedInterface
     {
         public void moveElement(int from, int to);
+    }
+
+    public interface OnDragStateChangedListener {
+        public void onDragStart();
+        public void onDragStop();
     }
 
     private void debugLog(String log)
@@ -289,6 +299,7 @@ public class DragSortRecycler extends RecyclerView.ItemDecoration implements Rec
 
             }
 
+            setIsDragging(dragging);
             if (dragging)
             {
                 debugLog("Started Drag");
@@ -358,6 +369,24 @@ public class DragSortRecycler extends RecyclerView.ItemDecoration implements Rec
 
         rv.invalidateItemDecorations();// Redraw
     }
+
+    private void setIsDragging(final boolean dragging) {
+        if(dragging != isDragging) {
+            isDragging = dragging;
+            if(dragStateChangedListener != null) {
+                if (isDragging) {
+                    dragStateChangedListener.onDragStart();
+                } else {
+                    dragStateChangedListener.onDragStop();
+                }
+            }
+        }
+    }
+
+    public void setDragStateChangedListener(final OnDragStateChangedListener dragStateChangedListener) {
+        this.dragStateChangedListener = dragStateChangedListener;
+    }
+
 
     Paint bgColor = new Paint();
     @Override

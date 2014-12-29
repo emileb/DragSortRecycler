@@ -63,16 +63,16 @@ public class DragSortRecycler extends RecyclerView.ItemDecoration implements Rec
     private int viewHandleId = -1;
 
 
-    ItemMovedInterface moveInterface;
+    OnItemMovedListener moveInterface;
     private boolean isDragging;
     @Nullable
     OnDragStateChangedListener dragStateChangedListener;
 
 
 
-    public interface ItemMovedInterface
+    public interface OnItemMovedListener
     {
-        public void moveElement(int from, int to);
+        public void onItemMoved(int from, int to);
     }
 
     public interface OnDragStateChangedListener {
@@ -94,7 +94,7 @@ public class DragSortRecycler extends RecyclerView.ItemDecoration implements Rec
     /*
      * Set the item move interface
      */
-    public void setItemMoveInterface(ItemMovedInterface swif)
+    public void setOnItemMovedListener(OnItemMovedListener swif)
     {
         moveInterface = swif;
     }
@@ -249,7 +249,7 @@ public class DragSortRecycler extends RecyclerView.ItemDecoration implements Rec
 
     @Override
     public boolean onInterceptTouchEvent(RecyclerView rv, MotionEvent e) {
-        Log.d(TAG,"onInterceptTouchEvent");
+       debugLog("onInterceptTouchEvent");
 
         //if (e.getAction() == MotionEvent.ACTION_DOWN)
         {
@@ -299,10 +299,12 @@ public class DragSortRecycler extends RecyclerView.ItemDecoration implements Rec
 
             }
 
-            setIsDragging(dragging);
+
             if (dragging)
             {
                 debugLog("Started Drag");
+
+                setIsDragging(true);
 
                 floatingItem = creatFloatingBitmap(itemView);
 
@@ -330,9 +332,10 @@ public class DragSortRecycler extends RecyclerView.ItemDecoration implements Rec
             {
                 long newPos = getNewPostion(rv);
                 if (moveInterface != null)
-                    moveInterface.moveElement((int) selectedDragItem, (int) newPos);
+                    moveInterface.onItemMoved((int)selectedDragItem, (int) newPos);
             }
 
+            setIsDragging(false);
             selectedDragItem = -1;
             floatingItem = null;
             rv.invalidateItemDecorations();
@@ -383,7 +386,7 @@ public class DragSortRecycler extends RecyclerView.ItemDecoration implements Rec
         }
     }
 
-    public void setDragStateChangedListener(final OnDragStateChangedListener dragStateChangedListener) {
+    public void setOnDragStateChangedListener(final OnDragStateChangedListener dragStateChangedListener) {
         this.dragStateChangedListener = dragStateChangedListener;
     }
 

@@ -7,19 +7,13 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.animation.Animation;
-import android.view.animation.AnimationUtils;
-import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.emtronics.dragsortrecycler.DragSortRecycler;
-import com.emtronics.testdragsortrecycler.R;
 
 import java.util.ArrayList;
 
@@ -60,13 +54,25 @@ public class MainActivity extends ActionBarActivity {
         dragSortRecycler.setAutoScrollSpeed(0.3f);
         dragSortRecycler.setAutoScrollWindow(0.1f);
 
-        dragSortRecycler.setItemMoveInterface(new DragSortRecycler.ItemMovedInterface() {
+        dragSortRecycler.setOnItemMovedListener(new DragSortRecycler.OnItemMovedListener() {
             @Override
-            public void moveElement(int from, int to) {
-                Log.d(TAG, "moveElement " + from + " to " + to);
+            public void onItemMoved(int from, int to) {
+                Log.d(TAG, "onItemMoved " + from + " to " + to);
                 Integer item = items.remove(from);
-                items.add(to,item);
+                items.add(to, item);
                 adapter.notifyDataSetChanged();
+            }
+        });
+
+        dragSortRecycler.setOnDragStateChangedListener(new DragSortRecycler.OnDragStateChangedListener() {
+            @Override
+            public void onDragStart() {
+                Log.d(TAG, "Drag Start");
+            }
+
+            @Override
+            public void onDragStop() {
+                Log.d(TAG, "Drag Stop");
             }
         });
 

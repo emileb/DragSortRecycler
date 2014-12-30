@@ -148,7 +148,7 @@ public class DragSortRecycler extends RecyclerView.ItemDecoration implements Rec
             int itemPos =  rv.getChildPosition(view);
             debugLog("itemPos =" + itemPos);
             
-            if(!canDragOver(itemPosition)) {
+            if(!canDragOver(itemPos)) {
                 return;
             }
 

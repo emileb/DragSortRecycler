@@ -35,11 +35,10 @@ Connecting to your RecyclerView
         DragSortRecycler dragSortRecycler = new DragSortRecycler();
         dragSortRecycler.setViewHandleId(R.id.imageView); //View you wish to use as the handle
         
-
-        dragSortRecycler.setItemMoveInterface(new DragSortRecycler.ItemMovedInterface() {
+        dragSortRecycler.setOnItemMovedListener(new DragSortRecycler.OnItemMovedListener() {
             @Override
-            public void moveElement(int from, int to) {
-                Log.d(TAG, "moveElements " + from + " to " + to);
+            public void onItemMoved(int from, int to) {
+                Log.d(TAG, "onItemMoved " + from + " to " + to);
             }
         });
 

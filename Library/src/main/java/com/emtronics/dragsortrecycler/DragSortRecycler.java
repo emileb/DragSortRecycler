@@ -149,7 +149,7 @@ public class DragSortRecycler extends RecyclerView.ItemDecoration implements Rec
             debugLog("itemPos =" + itemPos);
 
             //Movement of finger
-            float totalMovment = fingerY-fingerAnchorY;
+            float totalMovement = fingerY-fingerAnchorY;
 
             if (itemPos == selectedDragItemPos)
             {
@@ -169,7 +169,7 @@ public class DragSortRecycler extends RecyclerView.ItemDecoration implements Rec
                 {
                     if ((itemPos > selectedDragItemPos) && (view.getTop() < floatMiddleY))
                     {
-                        float amountUp = ((float)floatMiddleY - view.getTop()) / (float)view.getHeight();
+                        float amountUp = (floatMiddleY - view.getTop()) / (float)view.getHeight();
                       //  amountUp *= 0.5f;
                         if (amountUp > 1)
                             amountUp = 1;
@@ -309,7 +309,7 @@ public class DragSortRecycler extends RecyclerView.ItemDecoration implements Rec
 
                 setIsDragging(true);
 
-                floatingItem = creatFloatingBitmap(itemView);
+                floatingItem = createFloatingBitmap(itemView);
 
                 fingerAnchorY = (int)e.getY();
                 fingerOffsetInViewY = fingerAnchorY - itemView.getTop();
@@ -335,7 +335,7 @@ public class DragSortRecycler extends RecyclerView.ItemDecoration implements Rec
             {
                 int newPos = getNewPostion(rv);
                 if (moveInterface != null)
-                    moveInterface.onItemMoved((int) selectedDragItemPos, (int) newPos);
+                    moveInterface.onItemMoved(selectedDragItemPos, newPos);
             }
 
             setIsDragging(false);
@@ -345,7 +345,7 @@ public class DragSortRecycler extends RecyclerView.ItemDecoration implements Rec
             return;
         }
 
-        
+
         fingerY = (int)e.getY();
 
         if (floatingItem!=null)
@@ -361,19 +361,19 @@ public class DragSortRecycler extends RecyclerView.ItemDecoration implements Rec
         }
 
         //Do auto scrolling at end of list
-        float scrollAmmount=0;
+        float scrollAmount=0;
         if (fingerY > (rv.getHeight() * (1-autoScrollWindow)))
         {
-            scrollAmmount = (fingerY - (rv.getHeight() * (1-autoScrollWindow)));
+            scrollAmount = (fingerY - (rv.getHeight() * (1-autoScrollWindow)));
         }
         else if (fingerY < (rv.getHeight() * autoScrollWindow))
         {
-            scrollAmmount = (fingerY - (rv.getHeight() * autoScrollWindow));
+            scrollAmount = (fingerY - (rv.getHeight() * autoScrollWindow));
         }
-        debugLog("Scroll: " + scrollAmmount);
+        debugLog("Scroll: " + scrollAmount);
 
-        scrollAmmount *= autoScrollSpeed;
-        rv.scrollBy(0, (int)scrollAmmount);
+        scrollAmount *= autoScrollSpeed;
+        rv.scrollBy(0, (int)scrollAmount);
 
         rv.invalidateItemDecorations();// Redraw
     }
@@ -410,7 +410,6 @@ public class DragSortRecycler extends RecyclerView.ItemDecoration implements Rec
     RecyclerView.OnScrollListener scrollListener = new RecyclerView.OnScrollListener() {
         @Override
         public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
-            // TODO Auto-generated method stub
             super.onScrollStateChanged(recyclerView, newState);
         }
 
@@ -423,7 +422,7 @@ public class DragSortRecycler extends RecyclerView.ItemDecoration implements Rec
     };
 
 
-    private BitmapDrawable creatFloatingBitmap(View v)
+    private BitmapDrawable createFloatingBitmap(View v)
     {
         floatingItemStatingBounds = new Rect(v.getLeft(), v.getTop(),v.getRight(), v.getBottom());
         floatingItemBounds = new Rect(floatingItemStatingBounds);

@@ -138,7 +138,7 @@ public class MainActivity extends ActionBarActivity {
             }
             else
             {
-                pixels = (int) (50* scale + 0.5f);
+                pixels = (int) (50 * scale + 0.5f);
             }
             LinearLayout.LayoutParams params = (LinearLayout.LayoutParams) holder.iv.getLayoutParams();
             params.height = (int) pixels;

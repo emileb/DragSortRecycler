@@ -32,6 +32,8 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.support.annotation.Nullable;
 
+import java.lang.reflect.Modifier;
+
 
 public class DragSortRecycler extends RecyclerView.ItemDecoration implements RecyclerView.OnItemTouchListener {
 
@@ -220,10 +222,15 @@ public class DragSortRecycler extends RecyclerView.ItemDecoration implements Rec
         float floatMiddleY = floatingItemBounds.top + floatingItemBounds.height()/2;
 
         int above=0;
-        int below = rv.getLayoutManager().getItemCount();
+        int below = Integer.MAX_VALUE;
         for (int n=0;n < itemsOnScreen;n++) //Scan though items on screen, however they may not
         {                                   // be in order!
+
             View view = rv.getLayoutManager().getChildAt(n);
+
+            if (view.getVisibility() != View.VISIBLE)
+                continue;
+
             int itemPos = rv.getChildPosition(view);
 
             if (itemPos == selectedDragItemPos) //Don't check against itself!
@@ -243,10 +250,18 @@ public class DragSortRecycler extends RecyclerView.ItemDecoration implements Rec
         }
         debugLog("above = " + above + " below = " + below);
 
-        if (below < selectedDragItemPos) //Need to count itself
-            below++;
+        if (below != Integer.MAX_VALUE) {
+            if (below < selectedDragItemPos) //Need to count itself
+                below++;
+            return below - 1;
+        }
+        else
+        {
+            if (above < selectedDragItemPos)
+                above++;
 
-        return below - 1;
+            return above;
+        }
     }
 
 

@@ -53,6 +53,7 @@ public class MainActivity extends ActionBarActivity {
         dragSortRecycler.setFloatingBgColor(0x800000FF);
         dragSortRecycler.setAutoScrollSpeed(0.3f);
         dragSortRecycler.setAutoScrollWindow(0.1f);
+        dragSortRecycler.setPressDelayMillis(350);
 
         dragSortRecycler.setOnItemMovedListener(new DragSortRecycler.OnItemMovedListener() {
             @Override

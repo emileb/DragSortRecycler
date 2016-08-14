@@ -71,6 +71,7 @@ public class DragSortRecycler extends RecyclerView.ItemDecoration implements Rec
     @Nullable
     OnDragStateChangedListener dragStateChangedListener;
 
+    private long pressDelayMillis = 0;
 
 
     public interface OnItemMovedListener
@@ -138,6 +139,10 @@ public class DragSortRecycler extends RecyclerView.ItemDecoration implements Rec
         autoScrollSpeed = speed;
     }
 
+    public void setPressDelayMillis(long pressDelayMillis) {
+        this.pressDelayMillis = pressDelayMillis;
+    }
+
     @Override
     public void getItemOffsets(Rect outRect, View view, RecyclerView rv, RecyclerView.State state) {
         super.getItemOffsets(outRect, view, rv, state);
@@ -149,7 +154,7 @@ public class DragSortRecycler extends RecyclerView.ItemDecoration implements Rec
         {
             int itemPos =  rv.getChildPosition(view);
             debugLog("itemPos =" + itemPos);
-            
+
             if(!canDragOver(itemPos)) {
                 return;
             }
@@ -321,8 +326,9 @@ public class DragSortRecycler extends RecyclerView.ItemDecoration implements Rec
                 debugLog("handlePos = " + handlePos[0] + " " + handlePos[1]);
             }
 
+            long eventDuration = e.getEventTime() - e.getDownTime();
 
-            if (dragging)
+            if (dragging && eventDuration >= pressDelayMillis)
             {
                 debugLog("Started Drag");
 
@@ -397,6 +403,11 @@ public class DragSortRecycler extends RecyclerView.ItemDecoration implements Rec
         rv.invalidateItemDecorations();// Redraw
     }
 
+    @Override
+    public void onRequestDisallowInterceptTouchEvent(boolean disallowIntercept) {
+
+    }
+
     private void setIsDragging(final boolean dragging) {
         if(dragging != isDragging) {
             isDragging = dragging;
@@ -439,7 +450,7 @@ public class DragSortRecycler extends RecyclerView.ItemDecoration implements Rec
             fingerAnchorY -= dy;
         }
     };
-    
+
     /**
      *
      *

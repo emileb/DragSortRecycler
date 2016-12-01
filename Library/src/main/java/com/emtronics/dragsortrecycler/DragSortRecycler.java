@@ -26,20 +26,24 @@ import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.NinePatchDrawable;
+import android.support.annotation.Nullable;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
-import android.support.annotation.Nullable;
-
-import java.lang.reflect.Modifier;
+import android.widget.TextView;
 
 
-public class DragSortRecycler extends RecyclerView.ItemDecoration implements RecyclerView.OnItemTouchListener {
 
-    final String TAG = "DragSortRecycler";
+@SuppressWarnings("ALL")
+class DragSortRecycler extends RecyclerView.ItemDecoration implements RecyclerView.OnItemTouchListener {
 
-    final boolean DEBUG = false;
+    private final String TAG = "DragSortRecycler";
+
+    private final boolean DEBUG = true;
+    private NinePatchDrawable mShadowDrawable;
+    private Rect mShadowPadding = new Rect();
 
     private int dragHandleWidth = 0;
 
@@ -65,76 +69,84 @@ public class DragSortRecycler extends RecyclerView.ItemDecoration implements Rec
     private int viewHandleId = -1;
 
 
-    OnItemMovedListener moveInterface;
+    private OnItemMovedListener moveInterface;
 
     private boolean isDragging;
     @Nullable
-    OnDragStateChangedListener dragStateChangedListener;
+    private OnDragStateChangedListener dragStateChangedListener;
+
+    private int notDragable = -1;
+    private DragSortRecyclerAdapter mAdapter;
 
 
+    DragSortRecycler(DragSortRecyclerAdapter adapter) {
+        this.mAdapter = adapter;
+    }
 
-    public interface OnItemMovedListener
-    {
-        public void onItemMoved(int from, int to);
+
+    public interface OnItemMovedListener {
+        void onItemMoved(int from, int to);
     }
 
     public interface OnDragStateChangedListener {
-        public void onDragStart();
-        public void onDragStop();
+        void onDragStart();
+        void onDragStop();
     }
 
-    private void debugLog(String log)
-    {
+    @SuppressWarnings("ConstantConditions")
+    private void debugLog(String log) {
         if (DEBUG)
             Log.d(TAG, log);
     }
 
-    public RecyclerView.OnScrollListener getScrollListener()
-    {
+    public RecyclerView.OnScrollListener getScrollListener() {
         return scrollListener;
     }
 
     /*
      * Set the item move interface
      */
-    public void setOnItemMovedListener(OnItemMovedListener swif)
-    {
+    public void setOnItemMovedListener(OnItemMovedListener swif) {
         moveInterface = swif;
     }
 
-    public void setViewHandleId(int id)
-    {
+    public void setViewHandleId(int id) {
         viewHandleId = id;
     }
 
-    public void setLeftDragArea(int w)
-    {
+    public void setDraggingItemShadowDrawable(NinePatchDrawable shadow) {
+        mShadowDrawable = shadow;
+
+        if (mShadowDrawable != null) {
+            mShadowDrawable.getPadding(mShadowPadding);
+        }
+
+    }
+
+    public void setLeftDragArea(int w) {
         dragHandleWidth = w;
     }
 
-    public void setFloatingAlpha(float a)
-    {
+    public void setFloatingAlpha(float a) {
         floatingItemAlpha = a;
     }
 
-    public void setFloatingBgColor(int c)
-    {
+    public void setFloatingBgColor(int c) {
         floatingItemBgColor = c;
     }
-    /*
+
+    /**
      Set the window at top and bottom of list, must be between 0 and 0.5
      For example 0.1 uses the top and bottom 10% of the lists for scrolling
      */
-    public void setAutoScrollWindow(float w)
-    {
+    public void setAutoScrollWindow(float w) {
         autoScrollWindow = w;
     }
 
     /*
     Set the autoscroll speed, default is 0.5
      */
-    public void setAutoScrollSpeed(float speed)
-    {
+    public void setAutoScrollSpeed(float speed) {
         autoScrollSpeed = speed;
     }
 
@@ -142,27 +154,20 @@ public class DragSortRecycler extends RecyclerView.ItemDecoration implements Rec
     public void getItemOffsets(Rect outRect, View view, RecyclerView rv, RecyclerView.State state) {
         super.getItemOffsets(outRect, view, rv, state);
 
-        debugLog("getItemOffsets");
-
-        debugLog("View top = " + view.getTop());
-        if (selectedDragItemPos != -1)
-        {
-            int itemPos =  rv.getChildPosition(view);
+        if (selectedDragItemPos != -1) {
+            int itemPos =  rv.getChildAdapterPosition(view);
             debugLog("itemPos =" + itemPos);
-            
+
             if(!canDragOver(itemPos)) {
+                view.setVisibility(View.VISIBLE);
                 return;
             }
 
             //Movement of finger
-            float totalMovement = fingerY-fingerAnchorY;
-
-            if (itemPos == selectedDragItemPos)
-            {
+            if (itemPos == selectedDragItemPos) {
                 view.setVisibility(View.INVISIBLE);
             }
-            else
-            {
+            else {
                 //Make view visible incase invisible
                 view.setVisibility(View.VISIBLE);
 
@@ -171,12 +176,11 @@ public class DragSortRecycler extends RecyclerView.ItemDecoration implements Rec
 
                 //Moving down the list
                 //These will auto-animate if the device continually sends touch motion events
-               // if (totalMovment>0)
+                // if (totalMovment>0)
                 {
-                    if ((itemPos > selectedDragItemPos) && (view.getTop() < floatMiddleY))
-                    {
+                    if ((itemPos > selectedDragItemPos) && (view.getTop() < floatMiddleY)) {
                         float amountUp = (floatMiddleY - view.getTop()) / (float)view.getHeight();
-                      //  amountUp *= 0.5f;
+                        //  amountUp *= 0.5f;
                         if (amountUp > 1)
                             amountUp = 1;
 
@@ -185,12 +189,11 @@ public class DragSortRecycler extends RecyclerView.ItemDecoration implements Rec
                     }
 
                 }//Moving up the list
-               // else if (totalMovment < 0)
+                // else if (totalMovment < 0)
                 {
-                    if((itemPos < selectedDragItemPos) && (view.getBottom() > floatMiddleY))
-                    {
+                    if((itemPos < selectedDragItemPos) && (view.getBottom() > floatMiddleY)) {
                         float amountDown = ((float)view.getBottom() - floatMiddleY) / (float)view.getHeight();
-                      //  amountDown *= 0.5f;
+                        //  amountDown *= 0.5f;
                         if (amountDown > 1)
                             amountDown = 1;
 
@@ -200,8 +203,7 @@ public class DragSortRecycler extends RecyclerView.ItemDecoration implements Rec
                 }
             }
         }
-        else
-        {
+        else {
             outRect.top = 0;
             outRect.bottom = 0;
             //Make view visible incase invisible
@@ -215,48 +217,45 @@ public class DragSortRecycler extends RecyclerView.ItemDecoration implements Rec
      * This *seems* to work, another method would be to use
      * getItemOffsets, but I think that could miss items?..
      */
-    private int getNewPostion(RecyclerView rv)
-    {
+    private int getNewPostion(RecyclerView rv) {
         int itemsOnScreen = rv.getLayoutManager().getChildCount();
 
-        float floatMiddleY = floatingItemBounds.top + floatingItemBounds.height()/2;
+        float floatMiddleY = floatingItemBounds.top + floatingItemBounds.height() / 2;
 
-        int above=0;
+        int above = 0;
         int below = Integer.MAX_VALUE;
-        for (int n=0;n < itemsOnScreen;n++) //Scan though items on screen, however they may not
-        {                                   // be in order!
+
+        for (int n = 0; n < itemsOnScreen; n++) {
+            // Scan though items on screen, however they may not be in order!
 
             View view = rv.getLayoutManager().getChildAt(n);
 
             if (view.getVisibility() != View.VISIBLE)
                 continue;
 
-            int itemPos = rv.getChildPosition(view);
+            int itemPos = rv.getChildAdapterPosition(view);
 
             if (itemPos == selectedDragItemPos) //Don't check against itself!
                 continue;
 
-            float viewMiddleY = view.getTop() + view.getHeight()/2;
-            if (floatMiddleY > viewMiddleY) //Is above this item
-            {
+            float viewMiddleY = view.getTop() + view.getHeight() / 2;
+            if (floatMiddleY > viewMiddleY) {
+                 /*Is above this item*/
                 if (itemPos > above)
                     above = itemPos;
             }
-            else if (floatMiddleY <= viewMiddleY) //Is below this item
-            {
+            else if (floatMiddleY <= viewMiddleY) {
+                /*Is below this item*/
                 if (itemPos < below)
                     below = itemPos;
             }
         }
-        debugLog("above = " + above + " below = " + below);
 
         if (below != Integer.MAX_VALUE) {
             if (below < selectedDragItemPos) //Need to count itself
                 below++;
             return below - 1;
-        }
-        else
-        {
+        } else {
             if (above < selectedDragItemPos)
                 above++;
 
@@ -264,37 +263,50 @@ public class DragSortRecycler extends RecyclerView.ItemDecoration implements Rec
         }
     }
 
+    View itemView = null;
 
     @Override
     public boolean onInterceptTouchEvent(RecyclerView rv, MotionEvent e) {
-       debugLog("onInterceptTouchEvent");
 
-        //if (e.getAction() == MotionEvent.ACTION_DOWN)
-        {
-            View itemView = rv.findChildViewUnder(e.getX(), e.getY());
+        if (e.getAction() == MotionEvent.ACTION_UP) {
 
-            if (itemView==null)
+            //clear decorations when UP event
+            setIsDragging(false);
+            selectedDragItemPos = -1;
+            floatingItem = null;
+            rv.invalidateItemDecorations();
+
+            itemView = null;
+
+            return false;
+
+        } else if (e.getAction() == MotionEvent.ACTION_DOWN) {
+            itemView = rv.findChildViewUnder(e.getX(), e.getY());
+            return false;
+
+        } else if (e.getAction() == MotionEvent.ACTION_MOVE) {
+
+            if (itemView == null)
                 return false;
 
             boolean dragging = false;
 
-            if ((dragHandleWidth > 0 ) && (e.getX() < dragHandleWidth))
-            {
+            if ((dragHandleWidth > 0 ) && (e.getX() < dragHandleWidth)) {
                 dragging = true;
             }
-            else if (viewHandleId != -1)
-            {
+            else if (viewHandleId != -1) {
                 //Find the handle in the list item
                 View handleView = itemView.findViewById(viewHandleId);
+                TextView textView = (TextView) itemView.findViewById(R.id.widget_title);
 
-                if (handleView == null)
-                {
+                if (handleView == null) {
                     Log.e(TAG, "The view ID " + viewHandleId + " was not found in the RecycleView item");
                     return false;
                 }
 
                 //View should be visible to drag
-                if(handleView.getVisibility()!=View.VISIBLE) {
+                if(handleView.getVisibility() != View.VISIBLE) {
+                    debugLog("NOT VISIBLE");
                     return false;
                 }
 
@@ -316,15 +328,10 @@ public class DragSortRecycler extends RecyclerView.ItemDecoration implements Rec
 
                 if (touchBounds.contains((int)e.getX(), (int)e.getY()))
                     dragging = true;
-
-                debugLog("parentItemPos = " + parentItemPos[0] + " " + parentItemPos[1]);
-                debugLog("handlePos = " + handlePos[0] + " " + handlePos[1]);
             }
 
 
-            if (dragging)
-            {
-                debugLog("Started Drag");
+            if (dragging) {
 
                 setIsDragging(true);
 
@@ -334,27 +341,37 @@ public class DragSortRecycler extends RecyclerView.ItemDecoration implements Rec
                 fingerOffsetInViewY = fingerAnchorY - itemView.getTop();
                 fingerY = fingerAnchorY;
 
-                selectedDragItemPos = rv.getChildPosition(itemView);
+                selectedDragItemPos = rv.getChildAdapterPosition(itemView);
+
+                //the decoration is not always visible on DOWN envent,
+                //only on subsequest events the decorations are drawn
+                rv.invalidateItemDecorations();
+
                 debugLog("selectedDragItemPos = " + selectedDragItemPos);
 
                 return true;
             }
         }
+
         return false;
     }
 
     @Override
     public void onTouchEvent(RecyclerView rv, MotionEvent e) {
-        debugLog("onTouchEvent");
 
         if ((e.getAction() == MotionEvent.ACTION_UP) ||
-                (e.getAction() == MotionEvent.ACTION_CANCEL))
-        {
-            if ((e.getAction() == MotionEvent.ACTION_UP) && selectedDragItemPos != -1)
-            {
+                (e.getAction() == MotionEvent.ACTION_CANCEL)) {
+
+            if ((e.getAction() == MotionEvent.ACTION_UP) && selectedDragItemPos != -1) {
                 int newPos = getNewPostion(rv);
-                if (moveInterface != null)
-                    moveInterface.onItemMoved(selectedDragItemPos, newPos);
+                if (moveInterface != null) {
+
+                    if (mAdapter.isItemSortable(newPos)) {
+                        moveInterface.onItemMoved(selectedDragItemPos, newPos);
+                    } else {
+                        debugLog("NOT MOVING");
+                    }
+                }
             }
 
             setIsDragging(false);
@@ -364,15 +381,13 @@ public class DragSortRecycler extends RecyclerView.ItemDecoration implements Rec
             return;
         }
 
-
         fingerY = (int)e.getY();
 
-        if (floatingItem!=null)
-        {
+        if (floatingItem != null) {
             floatingItemBounds.top = fingerY - fingerOffsetInViewY;
 
-            if (floatingItemBounds.top < -floatingItemStatingBounds.height()/2) //Allow half the view out the top
-                floatingItemBounds.top = -floatingItemStatingBounds.height()/2;
+            if (floatingItemBounds.top < -floatingItemStatingBounds.height() / 2) //Allow half the view out the top
+                floatingItemBounds.top = -floatingItemStatingBounds.height() / 2;
 
             floatingItemBounds.bottom = floatingItemBounds.top + floatingItemStatingBounds.height();
 
@@ -380,21 +395,21 @@ public class DragSortRecycler extends RecyclerView.ItemDecoration implements Rec
         }
 
         //Do auto scrolling at end of list
-        float scrollAmount=0;
-        if (fingerY > (rv.getHeight() * (1-autoScrollWindow)))
-        {
-            scrollAmount = (fingerY - (rv.getHeight() * (1-autoScrollWindow)));
-        }
-        else if (fingerY < (rv.getHeight() * autoScrollWindow))
-        {
+        float scrollAmount = 0;
+        if (fingerY > (rv.getHeight() * (1 - autoScrollWindow))) {
+            scrollAmount = (fingerY - (rv.getHeight() * (1 - autoScrollWindow)));
+        } else if (fingerY < (rv.getHeight() * autoScrollWindow)) {
             scrollAmount = (fingerY - (rv.getHeight() * autoScrollWindow));
         }
-        debugLog("Scroll: " + scrollAmount);
 
         scrollAmount *= autoScrollSpeed;
         rv.scrollBy(0, (int)scrollAmount);
 
         rv.invalidateItemDecorations();// Redraw
+    }
+
+    @Override
+    public void onRequestDisallowInterceptTouchEvent(boolean disallowIntercept) {
     }
 
     private void setIsDragging(final boolean dragging) {
@@ -415,9 +430,11 @@ public class DragSortRecycler extends RecyclerView.ItemDecoration implements Rec
     }
 
 
-    Paint bgColor = new Paint();
+    private Paint bgColor = new Paint();
+
     @Override
     public void onDrawOver(Canvas c, RecyclerView parent, RecyclerView.State state) {
+        debugLog("onDrawOver");
         if (floatingItem != null) {
             floatingItem.setAlpha((int)(255 * floatingItemAlpha));
             bgColor.setColor(floatingItemBgColor);
@@ -426,7 +443,7 @@ public class DragSortRecycler extends RecyclerView.ItemDecoration implements Rec
         }
     }
 
-    RecyclerView.OnScrollListener scrollListener = new RecyclerView.OnScrollListener() {
+    private RecyclerView.OnScrollListener scrollListener = new RecyclerView.OnScrollListener() {
         @Override
         public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
             super.onScrollStateChanged(recyclerView, newState);
@@ -435,29 +452,34 @@ public class DragSortRecycler extends RecyclerView.ItemDecoration implements Rec
         @Override
         public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
             super.onScrolled(recyclerView, dx, dy);
-            debugLog("Scrolled: " + dx + " " + dy);
             fingerAnchorY -= dy;
         }
     };
-    
+
+
+    public void setNotDragable(int i) {
+        notDragable = i;
+    }
+
     /**
      *
      *
      * @param position
      * @return True if we can drag the item over this position, False if not.
      */
-    protected boolean canDragOver(int position) {
-        return true;
+    @SuppressWarnings({"SameReturnValue", "UnusedParameters"})
+    private boolean canDragOver(int position) {
+        return mAdapter.isItemSortable(position);
     }
 
 
-    private BitmapDrawable createFloatingBitmap(View v)
-    {
+    private BitmapDrawable createFloatingBitmap(View v) {
         floatingItemStatingBounds = new Rect(v.getLeft(), v.getTop(),v.getRight(), v.getBottom());
         floatingItemBounds = new Rect(floatingItemStatingBounds);
 
         Bitmap bitmap = Bitmap.createBitmap(floatingItemStatingBounds.width(),
                 floatingItemStatingBounds.height(), Bitmap.Config.ARGB_8888);
+
         Canvas canvas = new Canvas(bitmap);
         v.draw(canvas);
 
@@ -467,3 +489,4 @@ public class DragSortRecycler extends RecyclerView.ItemDecoration implements Rec
         return retDrawable;
     }
 }
+

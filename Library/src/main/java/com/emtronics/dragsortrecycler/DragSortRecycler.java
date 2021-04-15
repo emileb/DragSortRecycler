@@ -26,16 +26,15 @@ import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.graphics.drawable.BitmapDrawable;
-import android.support.v7.widget.RecyclerView;
+import androidx.annotation.Nullable;
+import androidx.recyclerview.widget.RecyclerView;
+import androidx.recyclerview.widget.RecyclerView.OnItemTouchListener;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
-import android.support.annotation.Nullable;
-
-import java.lang.reflect.Modifier;
 
 
-public class DragSortRecycler extends RecyclerView.ItemDecoration implements RecyclerView.OnItemTouchListener {
+public class DragSortRecycler extends RecyclerView.ItemDecoration implements OnItemTouchListener {
 
     final String TAG = "DragSortRecycler";
 
@@ -395,6 +394,11 @@ public class DragSortRecycler extends RecyclerView.ItemDecoration implements Rec
         rv.scrollBy(0, (int)scrollAmount);
 
         rv.invalidateItemDecorations();// Redraw
+    }
+
+    @Override
+    public void onRequestDisallowInterceptTouchEvent(boolean disallowIntercept) {
+
     }
 
     private void setIsDragging(final boolean dragging) {
